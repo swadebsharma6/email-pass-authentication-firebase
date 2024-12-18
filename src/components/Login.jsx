@@ -1,24 +1,53 @@
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import app from "../Firebase/firebase.config";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const auth = getAuth(app);
+  const emailRef = useRef(null);
 
   const handleLogin = (e) => {
     e.preventDefault();
     const form = e.target;
     const email = form.email.value;
     const password = form.password.value;
+    //reset error
+    setError("");
+    setSuccess("");
     // sign in user
     signInWithEmailAndPassword(auth, email, password)
-    .then(result =>{
-      const user = result.user;
-      console.log('sign in', user)
+      .then((result) => {
+        const user = result.user;
+        console.log("sign in", user);
+        setSuccess("User signIn Successful");
+      })
+      .catch((error) => {
+        console.log(error.message);
+        setError(error.message);
+      });
+  };
+
+  const handleResetPass = () => {
+    const email = emailRef.current.value;
+    if(!email){
+      console.log("Reset email", emailRef.current.value);
+      alert('Please provide a valid email')
+      return;
+    }
+
+    // validation email
+    sendPasswordResetEmail(auth, email)
+    .then(()=>{
+      console.log('Please check your email');
+      alert('Please check your email!')
     })
     .catch(error =>{
-      console.log(error.message)
+      setError(error.message)
     })
-
+   
   };
 
   return (
@@ -42,6 +71,7 @@ const Login = () => {
                 <input
                   type="email"
                   name="email"
+                  ref={emailRef}
                   placeholder="email"
                   className="input input-bordered"
                   required
@@ -59,7 +89,11 @@ const Login = () => {
                   required
                 />
                 <label className="label">
-                  <a href="#" className="label-text-alt link link-hover">
+                  <a
+                    onClick={handleResetPass}
+                    href="#"
+                    className="label-text-alt link link-hover"
+                  >
                     Forgot password?
                   </a>
                 </label>
@@ -69,7 +103,21 @@ const Login = () => {
                   Login
                 </button>
               </div>
+              <p className=" font-bold text-center py-3">
+                New to this Website, please{" "}
+                <Link className="text-primary" to="/register">
+                  Register
+                </Link>
+              </p>
             </form>
+            {error && (
+              <p className=" text-center pb-4 text-error font-bold">{error}</p>
+            )}
+            {success && (
+              <p className=" text-center pb-4 text-primary font-bold">
+                {success}
+              </p>
+            )}
           </div>
         </div>
       </div>

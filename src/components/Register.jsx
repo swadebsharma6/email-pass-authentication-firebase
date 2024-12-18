@@ -1,6 +1,7 @@
 import { useState } from "react";
 import app from "../Firebase/firebase.config";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, updateProfile } from "firebase/auth";
+import { Link } from "react-router-dom";
 
 
 const Register = () => {
@@ -15,19 +16,39 @@ const Register = () => {
             const name = form.name.value;
             const email = form.email.value;
             const password = form.password.value;
-            
+
+             //reset error
+             setError('');
+             setSuccess('');
+
             if (password.length < 6){
               setError('Password should be at least 6 character')
               return;
             }
-
-            //reset error
-            setError('');
-            setSuccess('');
+            else if(!/[A-Z]/.test(password)){
+                setError('Your password should have One Uppercase latter');
+                return
+            }
+           
           // create user
           createUserWithEmailAndPassword(auth, email, password)
           .then(result =>{
             const user = result.user;
+
+            // update profile
+            updateProfile(result.user, {
+              displayName: name,
+              photoURL: 'https://i.ibb.co.com/vHvVKW8/IMG-0619.jpg'
+            })
+            .then(()=> console.log('profile updated'))
+            .catch()
+
+            // send Verification Email
+            sendEmailVerification(user)
+            .then(()=>{
+              alert('Please Check your email and verify your account')
+            })
+            
             console.log('create', user);
             setSuccess('User created Successful')
           })
@@ -74,6 +95,7 @@ const Register = () => {
         <div className="form-control mt-6">
           <button type="submit" className="btn btn-primary">Register</button>
         </div>
+        <p className=" font-bold text-center py-3">Already have an account, please <Link className="text-primary" to='/login'>Login</Link></p>
       </form>
       {
         error && <p className=" text-center pb-4 text-error font-bold">{error}</p>
