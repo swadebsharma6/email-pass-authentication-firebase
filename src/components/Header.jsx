@@ -1,13 +1,33 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../Proider/AuthProvider";
 
 const Header = () => {
+  const { user , logOut} = useContext(AuthContext);
 
-      const links = <>
-      <li><Link to="/">Home</Link></li>
-      <li><Link to="/about">About</Link></li>
-      <li><Link to="/login">Login</Link></li>
-      <li><Link to="/register">Register</Link></li>
-      </>
+  const links = (
+    <>
+      <li>
+        <Link to="/">Home</Link>
+      </li>
+      <li>
+        <Link to="/about">About</Link>
+      </li>
+      <li>
+        <Link to="/login">Login</Link>
+      </li>
+      <li>
+        <Link to="/register">Register</Link>
+      </li>
+    </>
+  );
+
+  const handleLogOut =()=>{
+    logOut()
+    .then(()=>{
+      alert('LogOut Successfully')
+    })
+  }
 
   return (
     <>
@@ -34,17 +54,24 @@ const Header = () => {
               tabIndex={0}
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
             >
-             {links}
+              {links}
             </ul>
           </div>
           <a className="btn btn-ghost text-xl">Firebase</a>
         </div>
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            {links}
-          </ul>
+          <ul className="menu menu-horizontal px-1">{links}</ul>
         </div>
-      
+        <div className="navbar-end">
+          {user ? (
+            <button onClick={handleLogOut} className=" btn btn-sm btn-secondary mr-4">LogOut</button>
+          ) : (
+            <button className=" btn btn-sm btn-secondary mr-4"><Link to='/login'>Login</Link></button>
+          )}
+          <div className="btn btn-ghost btn-circle avatar">
+         {user && <img className="w-10 rounded-full" src={user?.photoURL} alt="" />}
+          </div>
+        </div>
       </div>
     </>
   );
