@@ -1,12 +1,14 @@
-import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
-import app from "../Firebase/firebase.config";
-import { useRef, useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+
+import { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../Proider/AuthProvider";
 
 const Login = () => {
+  const { loginUser } = useContext(AuthContext);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const auth = getAuth(app);
+
   const emailRef = useRef(null);
 
   const handleLogin = (e) => {
@@ -18,7 +20,7 @@ const Login = () => {
     setError("");
     setSuccess("");
     // sign in user
-    signInWithEmailAndPassword(auth, email, password)
+    loginUser( email, password)
       .then((result) => {
         const user = result.user;
         console.log("sign in", user);
@@ -32,22 +34,21 @@ const Login = () => {
 
   const handleResetPass = () => {
     const email = emailRef.current.value;
-    if(!email){
+    if (!email) {
       console.log("Reset email", emailRef.current.value);
-      alert('Please provide a valid email')
+      alert("Please provide a valid email");
       return;
     }
 
     // validation email
     sendPasswordResetEmail(auth, email)
-    .then(()=>{
-      console.log('Please check your email');
-      alert('Please check your email!')
-    })
-    .catch(error =>{
-      setError(error.message)
-    })
-   
+      .then(() => {
+        console.log("Please check your email");
+        alert("Please check your email!");
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
   };
 
   return (
